@@ -1,5 +1,7 @@
 <?php
-session_start();
+	session_start();
+	include_once'../classes/connection.php';
+	$conn=new Connection();
 ?>
 <!DOCTYPE=html>
 <html>
@@ -164,8 +166,19 @@ session_start();
 				padding:20px;
 				box-shadow:0 5px 10px gray;
 			}
-			.messages{
+			.comment_b{
 				display:block;
+				width:70%;
+				position:absolute;
+				top:20%;
+				left:25%;
+				border-style:none;
+				border-radius:5px;
+				background-color:#00cca3;
+				padding:10px;
+			}
+			.ad_b{
+				display:none;
 				width:70%;
 				position:absolute;
 				top:20%;
@@ -211,22 +224,34 @@ session_start();
 			h5 .add_org{
 				margin:10px 0 5px 10px;
 			}
+			#ttl{
+				position:relative;
+				bottom:30px;
+				color:#80ffbf;
+			}
+			#adminimg{
+				width:500px;
+				height:400px;
+				position:relative;
+				left:30%;
+				top:100px;
+			}
 		</style>
 	</head>
 	<body>
 		<div class="header">
 			<img src="../images/logo.png" class="logo" />
+			<span id="ttl">Location management system</span>
 			<div class="links">
-				<span id="homelink" > Home </span> |
-				<span id="morelink"> More </span> |
+				<span id="homelink" > Home </span>
 				<span id="loginlink" > Log in </span>
 			</div>
 			<img class="userImg" style="float:right;" class="userImg" src="../images/user.jpg" alt=""/>
 		</div>
 		<div class="content">
 			<?php
-				include('loginmodal.php');
-				include('dashboard.php');
+				include'include/loginmodal.php';
+				include'include/dashboard.php';
 			?>
 		</div>
 		<script type="text/javascript">
@@ -240,6 +265,7 @@ session_start();
 		}
 		
 		home.onclick=function(){
+			window.location="../index.php";
 		}
 
 		span.onclick=function() {

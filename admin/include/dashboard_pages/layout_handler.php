@@ -1,0 +1,35 @@
+<?php
+	if(count($_GET)>0&&(array_key_exists("layout",$_GET))){
+		$_SESSION["current_window"]=$_GET["layout"];
+	}
+	if(array_key_exists("current_window",$_SESSION)){
+		if($_SESSION["current_window"]=="advert"){
+			echo"<style>#ad_b{display:block;}
+				#comment_b{display:none;}
+				#setting_b{display:none;}
+				#add_org{display:none;}
+				#list_org{display:none;}</style>";
+		}
+		elseif($_SESSION["current_window"]=="setting"){
+			echo"<style>#ad_b{display:none;}
+				#comment_b{display:none;}
+				#setting_b{display:block;}
+				#add_org{display:none;}
+				#list_org{display:none;}</style>";
+		}
+		elseif($_SESSION["current_window"]=="add_company"){
+			echo"<style>#ad_b{display:none;}
+				#comment_b{display:none;}
+				#setting_b{display:none;}
+				#add_org{display:block;}
+				#list_org{display:none;}</style>";
+		}
+		elseif($_SESSION["current_window"]=="list_company"){
+			echo"<style>#ad_b{display:none;}
+				#comment_b{display:none;}
+				#setting_b{display:none;}
+				#add_org{display:none;}
+				#list_org{display:block;}</style>";
+		}
+	}
+?>

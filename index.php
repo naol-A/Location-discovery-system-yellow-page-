@@ -1,4 +1,9 @@
-<!DOCTYPE=html>
+<?php
+	include_once'classes/connection.php';
+	include_once'classes/company.php';
+	$conn=new Connection();
+?>
+<!DOCTYPE html>
 <html>
 	<head>
 		<title>::lms::</title>
@@ -6,6 +11,9 @@
 			body{
 				background:linear-gradient(to top,white,#99ccff);
 				font-family:Arial, Helvetica, sans-serif;
+			}
+			.intro{
+				display:block;
 			}
 			.logo{
 				border:solid;
@@ -167,7 +175,7 @@
 				width:99%;
 				margin:auto;
 				margin-top:50px;
-				height:180px;
+				height:300px;
 				position:relative;
 				top:100%;
 				box-shadow:0 -5px 10px gray;
@@ -186,6 +194,7 @@
 				width:50%;
 				margin:auto;
 				margin-top:70px;
+				border-width:0 2px 0 2px;
 			}
 			.companies{
 				background-color:#00ffcc;
@@ -193,8 +202,8 @@
 				border-top-width:4px;
 				border-color:gray;
 				border-radius:10px;
-				padding:10px;
-				margin:10px;
+				padding:0 5px 5px 5px;
+				margin:5px;
 			}
 			#network{
 				padding-top:10px;
@@ -207,47 +216,66 @@
 				border-radius:45px;
 				box-shadow:0 0px 15px white;
 			}
+			.intro{
+				display:none;
+			}
+			#prevbtn{
+				background-color:#00ff99;
+				padding:5px;
+				border-radius:30px;
+				box-shadow:0 0px 15px black;
+				border-style:solid;
+				border-width:1px;
+				float:left;
+				margin:10px 0 0 35%;
+			}
+			#nextbtn{
+				background-color:#00ff99;
+				padding:5px;
+				border-radius:30px;
+				box-shadow:0 0px 15px black;
+				border-style:solid;
+				border-width:1px;
+				float:right;
+				margin:10px 35% 0 0;
+			}
+			#ttl{
+				position:relative;
+				bottom:30px;
+				color:#80ffbf;
+			}
 		</style>
 	</head>
 	<body>
+		<?php include'pages/intro.php'; ?>
 		<div class="header">
 			<img src="images/logo.png" class="logo" />
+			<span id="ttl">Location management system</span>
 			<div class="links">
-				<span id="homelink"> Home </span>|
-				<span id="morelink"> More </span>|
 				<span id="aboutlink">about us</span>
 			</div>
 		</div>
 		<div class="content">
+			<?php
+				//include'pages/add_org_user.php';
+			?>
 			<span id="cat">Categories</span>
 			<span id="more">More</span>
 			<span id="searchbox">
 				<form id="searchbox" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"])?>" method="get">
-					<input id="searchinpt" type="text" />
+					<input id="searchinpt" type="text" name="search" />
 					<input id="searchbtn" type="submit" value="search"/>
 				</form>
 			</span>
 			<div id="catdrop" class="catdrop">
 				<?php
-					$server="localhost";
-					$username="root";
-					$password="vertrigops";
-					$database="lms";
-					
-					$conn=mysqli_connect($server,$username,$password,$database);
-					
-					if(!$conn){
-						die("connection with database failed: ".mysqli_connect_error());
-					}
-					
 					$sql="SELECT cname FROM category";
-					$result=mysqli_query($conn,$sql);
-					
-					if(mysqli_num_rows($result)>0){
-						for($row=0;$row<5;$row++){
+					$result=$conn->executeQuery($sql);
+					if($result->num_rows>0){
+						for($row=0;$row<1;$row++){
 							for($col=0;$col<10;$col++){
-								while($data=mysqli_fetch_assoc($result)){
-									echo "<span id='clist'>".$data["cname"]."</span>";
+								while($data=$result->fetch_assoc()){
+									echo "<span id='clist' onclick='selectCategory(\"".$data["cname"]."\")'>".$data["cname"]."</span>";
 								}
 							}
 							echo"<br /><hr/>";
@@ -256,53 +284,73 @@
 					else{
 						echo "-- no category --";
 					}
-					mysqli_close($conn);
 				?>
 			</div>
 			<div id="moredrop" class="moredrop">
-				<span>- Add organization</span><br/><hr/>
-				<span>- report error</span><br/><hr/>
+				<span id="add_org_gen">- Add organization</span><br/><hr/>
+				<span id="report_bug">- report error</span><br/><hr/>
 			</div>
 			<div class="companylist">
 				<?php
-					$conn=mysqli_connect("localhost","root","vertrigops","lms");
-					if(!$conn){
-						die("error: ".mysqli_connect_error());
+					$companylist=new Company();
+					$query;
+					$result;
+					//category condition
+					if(count($_GET)>0&&(array_key_exists("category",$_GET))){
+						$query="SELECT * FROM company WHERE cname = '".$_GET["category"]."';";
+						$result=$companylist->select($query);
+						echo "<style>#intro_modal{display:none;}</style>";
 					}
+					//search condition
+					elseif(count($_GET)>0&&(array_key_exists("search",$_GET))){
+						$query="SELECT * FROM company WHERE name like '%".$_GET["search"]."%';";
+						$result=$companylist->select($query);
+						echo "<style>#intro_modal{display:none;}</style>";
+					}
+					//page condition
+					elseif(count($_GET)>0&&(array_key_exists("page",$_GET))){
+						$query="SELECT * FROM company WHERE CID BETWEEN ".((($_GET["page"]-1)*4)+1)." AND ".((($_GET["page"]-1)*4)+4).";";
+						$result=$companylist->select($query);
+						echo "<style>#intro_modal{display:none;}</style>";
+					}
+					//main display condition
 					else{
-						$sql="SELECT * FROM company";
-						$query=mysqli_query($conn,$sql);
-						if(mysqli_num_rows($query)>0){
-							while($row=mysqli_fetch_assoc($query)){
-								echo"<div class='companies'><h3>".$row["name"]."</h3><hr />".
-								"<h5>".$row["phoneNumber"]."--".$row["cname"]."</h5></div>";
-							}
+						$query="SELECT * FROM company LIMIT 4";
+						$result=$companylist->select($query);
+					}
+					//if search not found
+					if($result->num_rows==0){
+						echo "<center>can not be found</center>";
+					}
+					//display the result
+					else{
+						while($row=$result->fetch_assoc()){
+							echo"<div class='companies'><h3>".$row["name"]."</h3><hr />".
+							"<h5>".$row["phoneNumber"]." -- ".$row["cname"]." -- ".$row["email"]."  -- ".$row["HouseNumber"]."</h5></div>";
 						}
 					}
-					mysqli_close($conn);
 				?>
 				<div id="pagenation">
 					<?php
-						$conn=mysqli_connect("localhost","root","vertrigops","lms");
-						if(!$conn){
-							die("ERROR: ".mysqli_connect_error());
-						}
-						$result=mysqli_query($conn,"SELECT name FROM company");
-						$rows=mysqli_num_rows($result);
-						if($rows<=6){
-							echo"<h5>page 1</h5>";
+						//
+						if(count($_GET)>0&&(array_key_exists("page",$_GET))&&$_GET["page"]!="1"){
+							echo "<span id='prevbtn' onclick='pagenation(".($_GET["page"]-1).")'>prev</span>";
+							echo "<span id='nextbtn' onclick='pagenation(".($_GET["page"]+1).")'>next</span>";
 						}
 						else{
-							for($i=1;$i<($rows/6)+1;$i++){
-								echo"<h5>page ".$i."</h5>";
-							}
+							echo "<span id='prevbtn'>prev</span>";
+							echo "<span id='nextbtn' onclick='pagenation(2)'>next</span>";
 						}
-						mysqli_close($conn);
 					?>
 				</div>
 			</div>
 		</div>
-		<?php include('pages/footer.php');?>
+		<?php 
+			include 'pages/footer.php';
+			include 'pages/about_us.php';
+			include 'pages/add_org_user.php';
+			include 'pages/comment_modal.php';
+			include 'pages/error_report.php';?>
 		<script type="text/javascript">
 			var cat=document.getElementById("cat");
 			var more=document.getElementById("more");
@@ -310,7 +358,19 @@
 			var catpan=document.getElementById("catdrop");
 			var catclicked=false;
 			var moreclicked=false;
-			
+			var searchbtn=document.getElementById("searchbtn");
+			var searchbox=document.getElementById("searchinpt");
+
+			function pagenation(pagenum){
+				window.location="index.php?page="+pagenum;
+			}
+			function searchQr(){
+				str=searchbox.value;
+				window.location="index.php?search="+str;
+			}
+			function selectCategory(categ){
+				window.location="index.php?category="+categ;
+			}
 			cat.onclick=function(){
 				if(catclicked==false && moreclicked==false){
 					catclicked=true;
